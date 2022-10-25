@@ -1,21 +1,24 @@
 package agh.ics.oop;
 
-public class World {
-    public static void main(String[] args) {
-//        System.out.println("Start");
-//        Direction[] directions = change(args);
-//        run(directions);
-//        System.out.println("Stop");
-        Vector2d position1 = new Vector2d(1, 2);
-        System.out.println(position1);
-        Vector2d position2 = new Vector2d(-2, 1);
-        System.out.println(position2);
-        System.out.println(position1.add(position2));
-//        System.out.println(MapDirection.EAST);
-//        System.out.println(MapDirection.SOUTH.previous());
-//        System.out.println(MapDirection.WEST.next());
-//        System.out.println(MapDirection.NORTH.toUnitVector());
+import java.util.Arrays;
+import java.util.List;
 
+public class World{
+    public static void main(String[] args) {
+        Animal lion = new Animal();
+        System.out.println(lion);
+
+        OptionsParser parser = new OptionsParser();
+        List<MoveDirection> directions = parser.parse(args);
+        System.out.println(directions);
+
+        for(MoveDirection element : directions) {
+            if (element != null) {
+                lion.move(element);
+            }else break;
+        }
+
+        System.out.println(lion);
     }
 
     static void run(Direction[] directions) {

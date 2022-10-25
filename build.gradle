@@ -30,6 +30,6 @@ java{
 
 }
 
-//run {
-//    args "f", "f", "r", "l"
-//}
+run {
+    args "r", "forward", "background", "f", "forward", "tt"
+}
