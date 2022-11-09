@@ -1,24 +1,14 @@
 package agh.ics.oop;
-
-import java.util.Arrays;
 import java.util.List;
 
 public class World{
     public static void main(String[] args) {
-        Animal lion = new Animal();
-        System.out.println(lion);
-
-        OptionsParser parser = new OptionsParser();
-        List<MoveDirection> directions = parser.parse(args);
-        System.out.println(directions);
-
-        for(MoveDirection element : directions) {
-            if (element != null) {
-                lion.move(element);
-            }else break;
-        }
-
-        System.out.println(lion);
+        List<MoveDirection> directions = new OptionsParser().parse(args);
+        IWorldMap map = new RectangularMap(10, 5);
+        Vector2d[] positions = { new Vector2d(2,2), new Vector2d(3,4) };
+        IEngine engine = new SimulationEngine(directions, map, positions);
+        engine.run();
+        System.out.println(map);
     }
 
     static void run(Direction[] directions) {

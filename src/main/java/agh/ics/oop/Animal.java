@@ -2,26 +2,43 @@ package agh.ics.oop;
 
 public class Animal {
 
-    static final Vector2d endMap = new Vector2d(4, 4);
-    static final Vector2d startMap = new Vector2d(0,0);
+    private final IWorldMap map;
     private MapDirection direction;
     private Vector2d position;
 
-    public Animal(){
+
+    public Animal(IWorldMap map){
+        this.map = map;
         this.direction = MapDirection.NORTH;
-        this.position = new Vector2d(2, 2);
+    }
+
+    public Animal(IWorldMap map, Vector2d initialPosition){
+        this.map = map;
+        this.position = initialPosition;
+        this.direction = MapDirection.NORTH;
     }
 
     @Override
     public String toString(){
-        return "Zwierze jest zwrócone w kierunku " + this.direction + " na współrzędnych " + this.position;
+        return switch (this.direction){
+            case NORTH -> "N";
+            case EAST -> "E";
+            case SOUTH -> "S";
+            case WEST -> "W";
+        };
+    }
+
+    public Vector2d getPosition() {
+        return this.position;
     }
 
     public boolean isAt(Vector2d position){
         return this.position.equals(position);
     }
 
-    public boolean isFacing(MapDirection direction){return this.direction.equals(direction);}
+    public boolean isFacing(MapDirection direction){
+        return this.direction.equals(direction);
+    }
 
     public void move(MoveDirection direction){
         switch (direction) {
@@ -29,13 +46,13 @@ public class Animal {
             case LEFT -> this.direction = this.direction.previous();
             case FORWARD -> {
                 Vector2d newPositionF = this.position.add(this.direction.toUnitVector());
-                if (newPositionF.precedes(endMap) && newPositionF.follows(startMap)) {
+                if (this.map.canMoveTo(newPositionF)) {
                     this.position = newPositionF;
                 }
             }
             case BACKWARD -> {
                 Vector2d newPositionB = this.position.add(this.direction.toUnitVector().opposite());
-                if (newPositionB.precedes(endMap) && newPositionB.follows(startMap)) {
+                if (this.map.canMoveTo(newPositionB)) {
                     this.position = newPositionB;
                 }
             }

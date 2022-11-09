@@ -1,5 +1,4 @@
 package agh.ics.oop;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -13,7 +12,8 @@ class AnimalTest {
 
     @Test
     void shouldHaveCorrectDirection() {
-        Animal animal = new Animal();
+        RectangularMap map = new RectangularMap(5, 5);
+        Animal animal = new Animal(map, new Vector2d(2, 2));
 
         List<MoveDirection> changeDirection = parser.parse(new String[]{"l", "right", "r", "r"});
         MapDirection[] correctDirections = new MapDirection[] {
@@ -29,7 +29,8 @@ class AnimalTest {
 
     @Test
     void shouldMovePositions(){
-        Animal animal = new Animal();
+        RectangularMap map = new RectangularMap(5, 5);
+        Animal animal = new Animal(map, new Vector2d(2, 2));
 
         List<MoveDirection> changePosition = parser.parse(new String[]{"f", "r", "f", "r", "b", "l", "b"});
         Vector2d[] correctPositions = new Vector2d[]{
@@ -48,7 +49,8 @@ class AnimalTest {
 
     @Test
     void shouldStayInTheMap(){
-        Animal animal = new Animal();
+        RectangularMap map = new RectangularMap(5, 5);
+        Animal animal = new Animal(map, new Vector2d(2, 2));
 
         List<MoveDirection> changePosition = parser.parse(new String[]{"l", "f", "f", "f", "l", "b", "b", "b"});
         Vector2d[] correctPositions = new Vector2d[]{

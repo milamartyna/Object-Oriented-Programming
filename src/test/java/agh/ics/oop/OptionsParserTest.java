@@ -28,4 +28,5 @@ class OptionsParserTest {
         assertArrayEquals(parser.parse(someIncorrect).toArray(), someIncorrectDirections);
         assertArrayEquals(parser.parse(onlyIncorrect).toArray(), onlyIncorrectDirections);
     }
+
 }
