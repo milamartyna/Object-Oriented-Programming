@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RectangularMapTest {
 
-    private final RectangularMap map = new RectangularMap(10, 5);
+    private final RectangularMap map = new RectangularMap(5, 5);
     private final Animal[] animals = new Animal[]{
             new Animal(map, new Vector2d(2, 2)),
             new Animal(map, new Vector2d(3, 4)),
@@ -26,9 +26,9 @@ class RectangularMapTest {
 
     @Test
     void shouldKnowWhatObjectAt(){
-        Animal animal = new Animal(map,new Vector2d(1, 8));
+        Animal animal = new Animal(map,new Vector2d(1, 4));
         map.place(animal);
-        assertEquals(animal, map.objectAt(animal.getPosition()));
+        assertEquals(animal, map.objectAt(animal.position()));
     }
 
 }

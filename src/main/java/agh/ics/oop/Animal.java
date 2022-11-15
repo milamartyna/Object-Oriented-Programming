@@ -1,11 +1,10 @@
 package agh.ics.oop;
 
-public class Animal {
+public class Animal implements IMapElement{
 
     private final IWorldMap map;
     private MapDirection direction;
     private Vector2d position;
-
 
     public Animal(IWorldMap map){
         this.map = map;
@@ -28,7 +27,8 @@ public class Animal {
         };
     }
 
-    public Vector2d getPosition() {
+    @Override
+    public Vector2d position() {
         return this.position;
     }
 
@@ -41,22 +41,25 @@ public class Animal {
     }
 
     public void move(MoveDirection direction){
+
+        Vector2d oldPosition = this.position;
+        Vector2d newPosition = this.position;
+
         switch (direction) {
             case RIGHT -> this.direction = this.direction.next();
             case LEFT -> this.direction = this.direction.previous();
-            case FORWARD -> {
-                Vector2d newPositionF = this.position.add(this.direction.toUnitVector());
-                if (this.map.canMoveTo(newPositionF)) {
-                    this.position = newPositionF;
-                }
-            }
-            case BACKWARD -> {
-                Vector2d newPositionB = this.position.add(this.direction.toUnitVector().opposite());
-                if (this.map.canMoveTo(newPositionB)) {
-                    this.position = newPositionB;
-                }
+            case FORWARD -> newPosition = this.position.add(this.direction.toUnitVector());
+            case BACKWARD -> newPosition = this.position.add(this.direction.toUnitVector().opposite());
+        }
+
+        if (this.map.canMoveTo(newPosition)) {
+            this.position = newPosition;
+            if(this.map instanceof GrassField){
+                ((GrassField) this.map).freeUpGrassSpot(oldPosition);
+                ((GrassField) this.map).animalEatsGrass(this);
             }
         }
+
     }
 
 }
