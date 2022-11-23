@@ -14,12 +14,13 @@ public class RectangularMap extends AbstractWorldMap{
     }
 
     @Override
-    public boolean place(Animal animal) {
+    public void place(Animal animal) {
         if(this.canMoveTo(animal.position())){
-            elementsOnTheMap.add(animal);
-            return true;
+            elementsOnTheMap.put(animal.position(), animal);
+            animal.addObserver(this);
+        }else {
+            throw new IllegalArgumentException(animal.position() + " is not a correct position");
         }
-        return false;
     }
 
     @Override

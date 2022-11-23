@@ -41,12 +41,12 @@ public record Vector2d(int x, int y) {
     public boolean equals(Object other) {
         if (this == other) return true;
         if (!(other instanceof Vector2d vector2d)) return false;
-        return x == vector2d.x && y == vector2d.y;
+        return this.x == vector2d.x && this.y == vector2d.y;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash(this.x, this.y);
     }
 
     public Vector2d opposite() {

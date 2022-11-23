@@ -13,7 +13,7 @@ class AnimalTest {
     @Test
     void shouldHaveCorrectDirection() {
         RectangularMap map = new RectangularMap(5, 5);
-        Animal animal = new Animal(map, new Vector2d(2, 2));
+        Animal animal = new Animal(map);
 
         List<MoveDirection> changeDirection = parser.parse(new String[]{"l", "right", "r", "r"});
         MapDirection[] correctDirections = new MapDirection[] {
@@ -30,7 +30,7 @@ class AnimalTest {
     @Test
     void shouldMovePositions(){
         RectangularMap map = new RectangularMap(5, 5);
-        Animal animal = new Animal(map, new Vector2d(2, 2));
+        Animal animal = new Animal(map);
 
         List<MoveDirection> changePosition = parser.parse(new String[]{"f", "r", "f", "r", "b", "l", "b"});
         Vector2d[] correctPositions = new Vector2d[]{
@@ -50,7 +50,7 @@ class AnimalTest {
     @Test
     void shouldStayInTheMap(){
         RectangularMap map = new RectangularMap(5, 5);
-        Animal animal = new Animal(map, new Vector2d(2, 2));
+        Animal animal = new Animal(map);
 
         List<MoveDirection> changePosition = parser.parse(new String[]{"l", "f", "f", "f", "l", "b", "b", "b"});
         Vector2d[] correctPositions = new Vector2d[]{

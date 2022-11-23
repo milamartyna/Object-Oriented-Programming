@@ -2,6 +2,7 @@ package agh.ics.oop;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class GrassField extends AbstractWorldMap {
@@ -29,46 +30,35 @@ public class GrassField extends AbstractWorldMap {
     }
 
     @Override
-    public boolean place(Animal animal) {
+    public void place(Animal animal) {
         if(this.canMoveTo(animal.position())){
             this.animalEatsGrass(animal);
-            this.elementsOnTheMap.add(animal);
-            return true;
-        }
-        return false;
-    }
-
-    public void animalEatsGrass(Animal animal){
-        Vector2d animalPosition = animal.position();
-
-        if(isPositionOnTheGrassTerritory(animalPosition)) {
-            Object objectOnTheAnimalPosition = objectAt(animalPosition);
-            if(objectOnTheAnimalPosition instanceof Grass) {
-                this.elementsOnTheMap.remove(objectOnTheAnimalPosition);
-                putGrassOnTheField(1);
-            }
-            this.unoccupiedGrassSpots.remove(animalPosition);
-        }
-    }
-
-    public void freeUpGrassSpot(Vector2d position){
-        if(isPositionOnTheGrassTerritory(position)){
-            this.unoccupiedGrassSpots.add(position);
+            this.elementsOnTheMap.put(animal.position(), animal);
+            animal.addObserver(this);
+        }else{
+            throw new IllegalArgumentException(animal.position() + " is not a correct position");
         }
     }
 
     @Override
+    public void positionChanged(Animal animal, Vector2d oldPosition, Vector2d newPosition){
+        this.animalEatsGrass(animal);
+        super.positionChanged(animal, oldPosition, newPosition);
+        this.freeUpGrassSpot(oldPosition);
+    }
+
+    @Override
     protected Vector2d getStartMap() {
-        for(IMapElement element : elementsOnTheMap){
-            this.startMap = this.startMap.lowerLeft(element.position());
+        for(var element : elementsOnTheMap.entrySet()){
+            this.startMap = this.startMap.lowerLeft(element.getKey());
         }
         return this.startMap;
     }
 
     @Override
     protected Vector2d getEndMap() {
-        for(IMapElement element : elementsOnTheMap){
-            this.endMap = this.endMap.upperRight(element.position());
+        for(var element : elementsOnTheMap.entrySet()){
+            this.endMap = this.endMap.upperRight(element.getKey());
         }
         return this.endMap;
     }
@@ -84,7 +74,7 @@ public class GrassField extends AbstractWorldMap {
     private void putGrassOnTheField(int grassSpotsCount){
         Collections.shuffle(this.unoccupiedGrassSpots);
         int length = this.unoccupiedGrassSpots.size();
-        int startIndex = grassSpotsCount - 1;
+        int startIndex = grassSpotsCount;
 
         for(int i = 0; i < grassSpotsCount; i++){
             if(i >= length){
@@ -92,9 +82,28 @@ public class GrassField extends AbstractWorldMap {
                 break;
             }
             Grass grass = new Grass(this.unoccupiedGrassSpots.get(i));
-            this.elementsOnTheMap.add(grass);
+            this.elementsOnTheMap.put(grass.position(), grass);
         }
-        this.unoccupiedGrassSpots = this.unoccupiedGrassSpots.subList(startIndex, length - 1);
+        this.unoccupiedGrassSpots = this.unoccupiedGrassSpots.subList(startIndex, length);
+    }
+
+    private void animalEatsGrass(Animal animal){
+        Vector2d animalPosition = animal.position();
+
+        if(isPositionOnTheGrassTerritory(animalPosition)) {
+            Object objectOnTheAnimalPosition = objectAt(animalPosition);
+            if(objectOnTheAnimalPosition instanceof Grass) {
+                this.elementsOnTheMap.remove(objectOnTheAnimalPosition);
+                this.putGrassOnTheField(1);
+            }
+            this.unoccupiedGrassSpots.remove(animalPosition);
+        }
+    }
+
+    private void freeUpGrassSpot(Vector2d position){
+        if(isPositionOnTheGrassTerritory(position)){
+            this.unoccupiedGrassSpots.add(position);
+        }
     }
 
     private boolean isPositionOnTheGrassTerritory(Vector2d position){

@@ -1,18 +1,19 @@
 package agh.ics.oop;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-abstract class AbstractWorldMap implements IWorldMap{
+abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver{
 
     protected Vector2d startMap;
     protected Vector2d endMap;
-    protected List<IMapElement> elementsOnTheMap;
+    protected HashMap<Vector2d, IMapElement> elementsOnTheMap;
     protected MapVisualiser mapVisualiser;
 
     public AbstractWorldMap(){
         this.mapVisualiser = new MapVisualiser(this);
-        this.elementsOnTheMap = new ArrayList<>();
+        this.elementsOnTheMap = new HashMap<>();
     }
 
     protected abstract Vector2d getEndMap();
@@ -21,10 +22,8 @@ abstract class AbstractWorldMap implements IWorldMap{
 
     @Override
     public Object objectAt(Vector2d position) {
-        for(IMapElement element : elementsOnTheMap){
-            if(position.equals(element.position())){
-                return element;
-            }
+        if(this.elementsOnTheMap.containsKey(position)){
+            return this.elementsOnTheMap.get(position);
         }
         return null;
     }
@@ -37,6 +36,13 @@ abstract class AbstractWorldMap implements IWorldMap{
     @Override
     public String toString(){
         return this.mapVisualiser.draw(getStartMap(), getEndMap());
+    }
+
+    @Override
+    public void positionChanged(Animal animal, Vector2d oldPosition, Vector2d newPosition){
+        IMapElement element = elementsOnTheMap.get(oldPosition);
+        elementsOnTheMap.remove(oldPosition);
+        elementsOnTheMap.put(newPosition, element);
     }
 
 }
