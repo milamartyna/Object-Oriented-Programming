@@ -16,10 +16,6 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver{
         this.elementsOnTheMap = new HashMap<>();
     }
 
-    protected abstract Vector2d getEndMap();
-
-    protected abstract Vector2d getStartMap();
-
     @Override
     public Object objectAt(Vector2d position) {
         if(this.elementsOnTheMap.containsKey(position)){
@@ -39,8 +35,7 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver{
     }
 
     @Override
-    public void positionChanged(Animal animal, Vector2d oldPosition, Vector2d newPosition){
-        IMapElement element = elementsOnTheMap.get(oldPosition);
+    public void positionChanged(IMapElement element, Vector2d oldPosition, Vector2d newPosition){
         elementsOnTheMap.remove(oldPosition);
         elementsOnTheMap.put(newPosition, element);
     }

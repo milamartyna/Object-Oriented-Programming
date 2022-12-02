@@ -2,11 +2,11 @@ package agh.ics.oop;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public class GrassField extends AbstractWorldMap {
 
+    private final MapBoundary mapBoundary = new MapBoundary();
     private List<Vector2d> unoccupiedGrassSpots = new ArrayList<>();
     private final int grassCoordinate;
     private final Vector2d startGrass = new Vector2d(0, 0);
@@ -32,35 +32,33 @@ public class GrassField extends AbstractWorldMap {
     @Override
     public void place(Animal animal) {
         if(this.canMoveTo(animal.position())){
-            this.animalEatsGrass(animal);
+            this.animalEatsGrass(animal.position());
             this.elementsOnTheMap.put(animal.position(), animal);
             animal.addObserver(this);
+            this.mapBoundary.add(animal);
         }else{
             throw new IllegalArgumentException(animal.position() + " is not a correct position");
         }
     }
 
     @Override
-    public void positionChanged(Animal animal, Vector2d oldPosition, Vector2d newPosition){
-        this.animalEatsGrass(animal);
-        super.positionChanged(animal, oldPosition, newPosition);
+    public void positionChanged(IMapElement element, Vector2d oldPosition, Vector2d newPosition){
+        if(element instanceof Animal){
+            this.animalEatsGrass(newPosition);
+        }
+        super.positionChanged(element, oldPosition, newPosition);
         this.freeUpGrassSpot(oldPosition);
+        this.mapBoundary.positionChanged(element, oldPosition, newPosition);
     }
 
     @Override
-    protected Vector2d getStartMap() {
-        for(var element : elementsOnTheMap.entrySet()){
-            this.startMap = this.startMap.lowerLeft(element.getKey());
-        }
-        return this.startMap;
+    public Vector2d getStartMap() {
+        return mapBoundary.getStartMap();
     }
 
     @Override
-    protected Vector2d getEndMap() {
-        for(var element : elementsOnTheMap.entrySet()){
-            this.endMap = this.endMap.upperRight(element.getKey());
-        }
-        return this.endMap;
+    public Vector2d getEndMap() {
+        return mapBoundary.getEndMap();
     }
 
     private void fillEmptyGrassSpotsList(){
@@ -83,17 +81,17 @@ public class GrassField extends AbstractWorldMap {
             }
             Grass grass = new Grass(this.unoccupiedGrassSpots.get(i));
             this.elementsOnTheMap.put(grass.position(), grass);
+            this.mapBoundary.add(grass);
         }
         this.unoccupiedGrassSpots = this.unoccupiedGrassSpots.subList(startIndex, length);
     }
 
-    private void animalEatsGrass(Animal animal){
-        Vector2d animalPosition = animal.position();
-
+    private void animalEatsGrass(Vector2d animalPosition){
         if(isPositionOnTheGrassTerritory(animalPosition)) {
             Object objectOnTheAnimalPosition = objectAt(animalPosition);
             if(objectOnTheAnimalPosition instanceof Grass) {
                 this.elementsOnTheMap.remove(objectOnTheAnimalPosition);
+                this.mapBoundary.remove((IMapElement) objectOnTheAnimalPosition);
                 this.putGrassOnTheField(1);
             }
             this.unoccupiedGrassSpots.remove(animalPosition);

@@ -24,12 +24,12 @@ public class RectangularMap extends AbstractWorldMap{
     }
 
     @Override
-    protected Vector2d getStartMap() {
+    public Vector2d getStartMap() {
         return this.startMap;
     }
 
     @Override
-    protected Vector2d getEndMap() {
+    public Vector2d getEndMap() {
         return this.endMap;
     }
 

@@ -23,7 +23,7 @@ public class SimulationEngine implements IEngine{
     public void run() {
         int n = this.animals.size();
         for(int i = 0; i < this.moves.size(); i++){
-            System.out.println(this.map);
+//            System.out.println(this.map);
             this.animals.get(i % n).move(moves.get(i));
         }
     }
