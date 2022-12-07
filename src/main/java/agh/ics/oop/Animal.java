@@ -32,6 +32,11 @@ public class Animal implements IMapElement{
     }
 
     @Override
+    public String getImagePath() {
+        return "src/main/resources/" + this.direction + ".png";
+    }
+
+    @Override
     public Vector2d position() {
         return this.position;
     }

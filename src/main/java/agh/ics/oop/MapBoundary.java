@@ -8,6 +8,7 @@ public class MapBoundary implements IPositionChangeObserver{
 
     SortedSet<Vector2d> setOnXAxis = new TreeSet<>(new MapElementComparatorX());
     SortedSet<Vector2d> setOnYAxis = new TreeSet<>(new MapElementComparatorY());
+
     @Override
     public void positionChanged(IMapElement element, Vector2d oldPosition, Vector2d newPosition) {
         setOnXAxis.remove(oldPosition);
@@ -33,6 +34,5 @@ public class MapBoundary implements IPositionChangeObserver{
     public Vector2d getStartMap(){
         return new Vector2d(setOnXAxis.first().x(), setOnYAxis.first().y());
     }
-
 
 }

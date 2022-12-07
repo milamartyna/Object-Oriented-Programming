@@ -2,85 +2,133 @@ package agh.ics.oop.gui;
 
 import agh.ics.oop.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
-
-
-public class App extends Application {
+public class App extends Application implements IPositionChangeObserver {
 
     private IWorldMap map;
-    private int xAxisLength;
-    private int yAxisLength;
-
     private Vector2d startMap;
     private Vector2d endMap;
+    private int xAxisLength;
+    private int yAxisLength;
+    private GridPane gridPane;
+    private SimulationEngine engine;
+    private VBox vBox;
+    private static final int TIME_DELAY = 300;
 
     @Override
     public void init() {
-        String[] parameters = getParameters().getRaw().toArray(new String[0]);
+
         try {
-            List<MoveDirection> directions = new OptionsParser().parse(parameters);
             this.map = new GrassField(10);
             Vector2d[] positions = {new Vector2d(2, 2), new Vector2d(3, 4)};
-            IEngine engine = new SimulationEngine(directions, map, positions);
-            engine.run();
-
-            this.startMap = map.getStartMap();
-            this.endMap = map.getEndMap();
-            this.xAxisLength = this.endMap.x() - this.startMap.x() + 1;
-            this.yAxisLength = this.endMap.y() - this.startMap.y() + 1;
-
-            System.out.println(map);
+            this.engine = new SimulationEngine(map, positions, this, TIME_DELAY);
+            this.gridPane = new GridPane();
 
         } catch (IllegalArgumentException iae){
             System.out.println(iae.getMessage());
         }
+
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        GridPane gridpane = new GridPane();
-        gridpane.setGridLinesVisible(true);
+    public void start(Stage primaryStage) throws FileNotFoundException {
 
-        this.setAxisLabels(gridpane);
-        this.setObject(gridpane);
-        this.setSizeOfRowsColumns(gridpane);
-        gridpane.setPadding(new Insets(10, 10, 10, 10));
+        Button startButton = new Button("Start");
+        TextField textField = new TextField();
+        HBox buttonBox = createButtonBox(startButton, textField);
 
-        Scene scene = new Scene(gridpane, 500, 500);
+        startButton.setOnAction(action -> {
+            this.engine.setMoves(this.parseTextField(textField));
+            Thread thread = new Thread(this.engine);
+            thread.start();
+        });
+
+        this.createScene();
+
+        VBox sceneBox = new VBox(this.gridPane, buttonBox);
+        Scene scene = new Scene(sceneBox, 600, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
 
     }
 
-    private void setAxisLabels(GridPane gridpane){
+    public void positionChanged(IMapElement element, Vector2d oldPosition, Vector2d newPosition){
+        Platform.runLater(() -> {
+            this.deleteScene();
+            try {
+                this.createScene();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private HBox createButtonBox(Button button, TextField textField){
+        textField.setPrefWidth(200);
+
+        HBox buttonBox = new HBox(textField, button);
+        buttonBox.setPadding(new Insets(10, 10, 10, 10));
+        buttonBox.setAlignment(Pos.CENTER);
+        return buttonBox;
+    }
+
+    private List<MoveDirection> parseTextField(TextField textField){
+        String[] parameters;
+        String textInput = textField.getText();
+        parameters = textInput.split(" ");
+        return new OptionsParser().parse(parameters);
+    }
+
+    private void deleteScene(){
+        this.gridPane.getChildren().clear();
+        this.gridPane.getColumnConstraints().clear();
+        this.gridPane.getRowConstraints().clear();
+        this.gridPane.setGridLinesVisible(false);
+    }
+
+    private void createScene() throws FileNotFoundException {
+        this.setMapBounds();
+        this.setAxisLabels();
+        this.setObject();
+        this.setSizeOfRowsColumns();
+        this.gridPane.setPadding(new Insets(10, 10, 10, 10));
+        this.gridPane.setGridLinesVisible(true);
+    }
+
+    private void setAxisLabels(){
+
         Label xyLabel = new Label("y/x");
-        gridpane.add(xyLabel, 0, 0);
+        this.gridPane.add(xyLabel, 0, 0);
         GridPane.setHalignment(xyLabel, HPos.CENTER);
 
         for(int i = 0; i < this.xAxisLength; i++){
             Label label = new Label(Integer.toString(i + this.startMap.x()));
-            gridpane.add(label, i + 1, 0);
+            this.gridPane.add(label, i + 1, 0);
             GridPane.setHalignment(label, HPos.CENTER);
         }
 
         for(int i = 0; i < this.yAxisLength; i++){
             Label label = new Label(Integer.toString(this.endMap.y() - i));
-            gridpane.add(label, 0, i + 1);
+            this.gridPane.add(label, 0, i + 1);
             GridPane.setHalignment(label, HPos.CENTER);
         }
+
     }
 
-    private void setObject(GridPane gridPane){
+    private void setObject() throws FileNotFoundException {
 
         for(int i = this.startMap.x(); i <= this.endMap.x(); i++){
             for(int j = this.startMap.y(); j <= this.endMap.y(); j++){
@@ -89,23 +137,32 @@ public class App extends Application {
 
                 if(this.map.isOccupied(position)){
                     Object object = this.map.objectAt(position);
-                    Label label = new Label(object.toString());
-                    gridPane.add(label, i - this.startMap.x() + 1, this.endMap.y() - j + 1);
-                    GridPane.setHalignment(label, HPos.CENTER);
+                    GuiElementBox guiElementBox = new GuiElementBox((IMapElement) object);
+                    this.vBox = guiElementBox.getVBox();
+                    this.gridPane.add(this.vBox, i - this.startMap.x() + 1, this.endMap.y() - j + 1);
+                    GridPane.setHalignment(this.vBox, HPos.CENTER);
                 }
             }
         }
 
     }
 
-    private void setSizeOfRowsColumns(GridPane gridpane){
+    private void setSizeOfRowsColumns(){
         for(int i = 0; i <= this.xAxisLength; i++){
-            gridpane.getColumnConstraints().add(new ColumnConstraints(30));
+            this.gridPane.getColumnConstraints().add(new ColumnConstraints(40));
         }
 
         for(int i = 0; i <= this.yAxisLength; i++){
-            gridpane.getRowConstraints().add(new RowConstraints(30));
+            this.gridPane.getRowConstraints().add(new RowConstraints(40));
         }
     }
+
+    private void setMapBounds(){
+        this.startMap = map.getStartMap();
+        this.endMap = map.getEndMap();
+        this.xAxisLength = this.endMap.x() - this.startMap.x() + 1;
+        this.yAxisLength = this.endMap.y() - this.startMap.y() + 1;
+    }
+
 
 }

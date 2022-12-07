@@ -7,4 +7,10 @@ public record Grass(Vector2d position) implements IMapElement {
         return "*";
     }
 
+    @Override
+    public String getImagePath() {
+        return "src/main/resources/greenGrass.png";
+    }
+
+
 }
